@@ -397,6 +397,36 @@ void st_test() {
 	printf("pass - neg\n");
 }
 
+void sti_test() {
+	/**
+	 * memory[0x3010] = 0x2000;
+	 * rpc = 0x3000
+	 * offset = 0x10
+	 */
+	const uint16_t sti_instr = 0xB210; //sti r1,LABEL
+	const uint16_t sti_expected = 0x1234;
+	registers[R_PC] = 0x3000;
+	registers[R_1] = sti_expected;
+	mem_write(0x3010, 0x2000);
+
+	lc3_sti(sti_instr);
+	assert(mem_read(0x2000) == sti_expected);
+}
+
+void str_test() {
+	/**
+	 * base = 0x3000 (r1)
+	 * offset = 0x10
+	 * src = 0x1234 (r0)
+	 */
+	const uint16_t str_instr = 0x7050; //str r0,r1,imm10
+	registers[R_0] = 0x1234;
+	registers[R_1] = 0x3000;
+
+	lc3_str(str_instr);
+	assert(mem_read(0x3010) == 0x1234);
+}
+
 int main(int argc, char** argv) {
 	before();
 	printf("Begin: add_test\n");
@@ -452,5 +482,15 @@ int main(int argc, char** argv) {
 	printf("Begin: st_test\n");
 	st_test();
 	printf("PASSED: st_test\n");
+	
+	before();
+	printf("Begin: sti_test\n");
+	sti_test();
+	printf("PASSED: sti_test\n");
+	
+	before();
+	printf("Begin: str_test\n");
+	str_test();
+	printf("PASSED: str_test\n");
 	return 0;
 }
